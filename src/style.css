@@ -1,0 +1,111 @@
+:root {
+  --bg: #220044;
+  --fg: #7766dd;
+  --accent: #4411bb;
+  --error: #ff4488;
+  --disabled: #5522aa;
+  --radius: 10px;
+  --spacing: 1rem;
+}
+
+body {
+  margin: 0;
+  padding: var(--spacing);
+  background: var(--bg);
+  color: var(--fg);
+  font-family: system-ui, -apple-system, sans-serif;
+  min-width: 320px;
+}
+
+main {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing);
+}
+
+h1 {
+  margin: 0;
+  font-size: 1.5rem;
+  color: var(--accent);
+}
+
+button {
+  padding: 0.6rem 1.2rem;
+  border-radius: var(--radius);
+  border: 2px solid var(--accent);
+  background: transparent;
+  color: var(--fg);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+button:hover:not(:disabled) {
+  background: var(--accent);
+}
+
+button:disabled {
+  border-color: var(--disabled);
+  color: var(--disabled);
+  cursor: not-allowed;
+}
+
+textarea {
+  padding: 0.5rem;
+  border-radius: var(--radius);
+  border: 2px solid var(--accent);
+  background: transparent;
+  color: var(--fg);
+  font-family: inherit;
+  resize: none;
+  width: 100%;
+  box-sizing: border-box;
+  transition: all 0.2s;
+}
+
+textarea:not(:empty) {
+  cursor: pointer;
+}
+
+textarea:not(:empty):hover {
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+}
+
+textarea::placeholder {
+  color: var(--disabled);
+}
+
+textarea:focus {
+  outline: none;
+  border-color: var(--fg);
+}
+
+#msg {
+  padding: 0.5rem;
+  border-radius: var(--radius);
+}
+
+#msg.error {
+  background: color-mix(in srgb, var(--error) 15%, transparent);
+  color: var(--error);
+  border: 2px solid var(--error);
+}
+
+#msg.error a {
+  color: var(--error);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+#msg.error a:hover {
+  opacity: 0.8;
+}
+
+.btn-group {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.btn-group button {
+  flex: 1;
+}

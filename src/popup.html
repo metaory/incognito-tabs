@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'" />
+    <title>Incognito Tabs</title>
+    <link rel="stylesheet" href="./style.css" />
+    <script type="module" src="./main.js"></script>
+  </head>
+  <body>
+    <main>
+      <h1>Incognito Tabs</h1>
+      <span id="msg"></span>
+      <div class="btn-group">
+        <button disabled id="btn-save">To File</button>
+        <button disabled id="btn-copy">To Text</button>
+      </div>
+      <textarea id="text" rows="3" placeholder="Paste text here..."></textarea>
+      <div class="btn-group">
+        <button disabled id="btn-load">From File</button>
+        <button id="btn-paste">From Text</button>
+      </div>
+    </main>
+  </body>
+</html>
