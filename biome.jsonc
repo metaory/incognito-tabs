@@ -1,0 +1,136 @@
+{
+  "$schema": "https://biomejs.dev/schemas/1.9.4/schema.json",
+  "vcs": {
+    "enabled": true,
+    "clientKind": "git",
+    "useIgnoreFile": true
+  },
+  "files": {
+    "ignoreUnknown": true,
+    // "include": ["**/*.js"],
+    "ignore": ["**/*.min.js"]
+  },
+  // ############## //
+  "linter": {
+    "enabled": true,
+    "rules": {
+      // "all": true,
+      "recommended": true,
+      "complexity": {
+        "noForEach": "off",
+        "all": true
+      },
+      "correctness": {
+        "all": true
+        //"noUndeclaredDependencies": "off"
+      },
+      "nursery": {
+        "all": true,
+        "noNestedTernary": "warn"
+      },
+      "performance": {
+        "noAccumulatingSpread": "off"
+      },
+      "security": {},
+      "suspicious": {
+        "all": true,
+        "noDebugger": "off",
+        "noConsole": "off",
+        "noConsoleLog": "off"
+      },
+      "style": {
+        "noDefaultExport": "off",
+        //"useNamingConvention": "error",
+        "useNamingConvention": {
+          "level": "error",
+          "options": {
+            "strictCase": false,
+            "requireAscii": true,
+            "enumMemberCase": "CONSTANT_CASE",
+            "conventions": [
+              {
+                "selector": {
+                  "kind": "objectLiteralMember"
+                },
+                "formats": ["camelCase"]
+              },
+              {
+                "selector": {
+                  "kind": "classMember",
+                  "modifiers": ["private"]
+                },
+                "match": "_(.+)",
+                "formats": ["camelCase"]
+              }
+            ]
+          }
+        },
+        "useExplicitLengthCheck": "off",
+        "noShoutyConstants": "warn",
+        "useTemplate": {
+          "level": "warn",
+          "fix": "unsafe"
+        }
+      }
+    }
+  },
+  // -------------- //
+  "organizeImports": {
+    "enabled": true
+  },
+  // -------------- //
+  "formatter": {
+    "enabled": true,
+    "attributePosition": "auto",
+    "formatWithErrors": true,
+    "indentStyle": "space",
+    "lineWidth": 100
+  },
+  // ############## //
+  "javascript": {
+    "jsxRuntime": "transparent",
+    "globals": ["chrome"],
+    "formatter": {
+      "arrowParentheses": "asNeeded",
+      "quoteStyle": "single",
+      "attributePosition": "multiline",
+      "semicolons": "asNeeded",
+      "lineWidth": 100
+    }
+  },
+  "json": {
+    "parser": {
+      "allowTrailingCommas": true,
+      "allowComments": true
+    },
+    "formatter": {
+      "enabled": true
+    }
+  }
+}
+/*
+kind
+  catchParameter    namespace
+  class             namespaceLike
+  classGetter       objectLiteralGetter
+  classMember       objectLiteralMember
+  classMethod       objectLiteralMethod
+  classProperty     objectLiteralProperty
+  classSetter       objectLiteralSetter
+  const             typeAlias
+  enum              typeGetter
+  exportAlias       typeLike
+  exportNamespace   typeMember
+  function          typeMethod
+  functionParameter typeParameter
+  importAlias       typeProperty
+  importNamespace   typeSetter
+  indexParameter    using
+  interface         var
+  let               variable
+modifiers
+  abstract          protected
+  private           readonly
+  static
+scope
+  any               global * */

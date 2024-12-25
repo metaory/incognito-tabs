@@ -1,16 +1,16 @@
 {
   "manifest_version": 3,
   "name": "Incognito Tabs",
-  "short_name": "inco",
-  "version": "1.2.0",
-  "description": "Secure incognito tab manager with AES-GCM encryption",
+  "short_name": "incotab",
+  "version": "1.3.0",
+  "description": "Encrypted Incognito Tab Manager",
   "author": "metaory",
   "homepage_url": "https://github.com/metaory/incognito-tabs",
   "offline_enabled": true,
 
-  "permissions": ["tabs", "windows"],
+  "permissions": ["tabs", "windows", "storage"],
   "incognito": "split",
-  "minimum_chrome_version": "102",
+  "minimum_chrome_version": "109",
 
   "icons": {
     "16": "icons/icon-16.png",
@@ -21,5 +21,9 @@
   "action": {
     "default_popup": "src/popup.html",
     "default_icon": "icons/icon-48.png"
+  },
+
+  "content_security_policy": {
+    "extension_pages": "default-src 'self'; script-src 'self'"
   }
 }
