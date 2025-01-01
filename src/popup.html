@@ -3,13 +3,19 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Incognito Tabs</title>
+    <title>xTabs</title>
     <link rel="stylesheet" href="./style.css" />
   </head>
   <body>
     <main>
-      <h1>Incognito Tabs</h1>
+      <h1>xTabs</h1>
       <span id="msg" role="status" aria-live="polite"></span>
+      <select id="save-mode" class="select">
+        <option value="current">Current Window</option>
+        <option value="all">All Windows</option>
+        <option value="incognito">All Incognito</option>
+        <option value="normal">All Normal</option>
+      </select>
       <div class="btn-group">
         <button id="save" disabled>To File</button>
         <button id="copy" disabled>To Text</button>

@@ -30,7 +30,8 @@ h1 {
 }
 
 button,
-textarea {
+textarea,
+select {
   padding: var(--pad);
   border: 2px solid var(--accent);
   border-radius: 10px;
@@ -45,7 +46,8 @@ button {
   cursor: pointer;
 }
 
-button:hover:not(:disabled) {
+button:hover:not(:disabled),
+select:hover {
   background: var(--accent);
 }
 
@@ -75,9 +77,24 @@ textarea:not(:placeholder-shown):active {
   background: color-mix(in srgb, var(--accent) 20%, transparent);
 }
 
-textarea:focus {
+textarea:focus,
+select:focus {
   outline: 0;
   border-color: var(--fg);
+}
+
+select {
+  cursor: pointer;
+  appearance: none;
+  background-image: url('./assets/arrow.svg');
+  background-repeat: no-repeat;
+  background-position: right var(--pad) center;
+  padding-right: calc(var(--pad) * 3);
+}
+
+select option {
+  background: var(--bg);
+  color: var(--fg);
 }
 
 #msg {

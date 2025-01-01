@@ -1,95 +1,135 @@
-export const cfg = {
+const cfg = {
   crypto: {
     aes: { name: 'AES-GCM', length: 256 },
     wrap: { name: 'AES-KW', length: 256 },
     iv: 12,
-    usage: ['wrapKey', 'unwrapKey'],
-  },
+    usage: ['wrapKey', 'unwrapKey']
+  }
 }
 
-export const has = x => x?.length > 0
-export const trim = x => x?.trim()
-export const pipe =
-  (...fns) =>
-  x =>
-    fns.reduce((v, f) => f(v), x)
-
-export const b64 = {
+// Core utils
+const has = x => x?.length > 0
+const trim = x => x?.trim()
+const b64 = {
   encode: buf => btoa(String.fromCharCode(...new Uint8Array(buf))),
-  decode: str => Uint8Array.from(atob(str), c => c.charCodeAt(0)).buffer,
+  decode: str => Uint8Array.from(atob(str), c => c.charCodeAt(0)).buffer
 }
 
-const getIncognitoUrls = pipe(
-  windows => windows.filter(w => w.incognito && w.tabs).flatMap(w => w.tabs),
-  tabs => tabs.filter(t => t?.url && t.url !== 'chrome://newtab/').map(t => t.url),
-)
+// Cache management
+const createCache = (ttl = 1000) => {
+  const state = { data: null, time: 0 }
+  const isValid = () => state.data && Date.now() - state.time < ttl
+  const set = val => Object.assign(state, { data: val, time: Date.now() }) && val
+  const clear = () => Object.assign(state, { data: null, time: 0 })
+  return { get: () => isValid() ? state.data : null, set, clear }
+}
 
-const getDomain = url => new URL(url).hostname || ''
-const groupByDomain = urls =>
-  urls.reduce((acc, url) => {
-    const domain = getDomain(url)
-    return domain ? { ...acc, [domain]: [...(acc[domain] || []), url] } : acc
-  }, {})
+const createMap = () => {
+  const map = new Map()
+  return key => map.get(key) ?? map.set(key, new URL(key).hostname || '').get(key)
+}
 
-const getWindows = () => chrome.windows.getAll({ populate: true })
-const checkIncognito =
-  setState =>
-  ([tab]) =>
-    tab?.incognito ? true : setState('!Please open in incognito window')
+// Tab management
+const isValidTab = t => t?.url && t.url !== 'chrome://newtab/'
+const getTabUrls = tabs => tabs?.filter(isValidTab).map(t => t.url) ?? []
+const filterTabs = (windows = [], pred = () => true) =>
+  windows.filter(pred).flatMap(w => w?.tabs ?? [])
 
-export const url = {
+const cache = createCache()
+const getDomain = createMap()
+
+const getWindows = () => cache.get() ?? chrome.windows.getAll({ populate: true })
+  .then(cache.set).catch(() => [])
+
+const groupByDomain = urls => !urls?.length ? {} : urls.reduce((acc, url) => {
+  const domain = getDomain(url)
+  return domain ? { ...acc, [domain]: [...(acc[domain] ?? []), url] } : acc
+}, {})
+
+const getStats = async () => {
+  const windows = await getWindows()
+  const tabs = getTabUrls(windows.flatMap(w => w?.tabs ?? []))
+  return { windows, tabs }
+}
+
+const getTabsByMode = (current, windows, mode) => {
+  const modes = {
+    current: () => current?.tabs,
+    all: () => windows.flatMap(w => w?.tabs ?? []),
+    incognito: () => filterTabs(windows, w => w?.incognito),
+    normal: () => filterTabs(windows, w => !w?.incognito)
+  }
+  return modes[mode]?.() ?? []
+}
+
+const getWindowData = async () => {
+  const [current, { windows }] = await Promise.all([
+    chrome.windows.getCurrent({ populate: true }),
+    getStats()
+  ]).catch(() => [{ tabs: [] }, { windows: [] }])
+  return { current, windows }
+}
+
+// URL management
+const url = {
   getDomain,
-  getStats: () =>
-    pipe(getWindows, async windows => ({
-      windows: windows.length,
-      tabs: getIncognitoUrls(windows).length,
-    }))(),
-  getIncognitoUrls: setState =>
-    pipe(
-      () => chrome.tabs.query({ active: true, currentWindow: true }),
-      async tabs => checkIncognito(setState)(tabs) && (await getWindows()),
-      windows => windows && getIncognitoUrls(windows),
-      urls => (urls?.length ? urls : setState('!No tabs found')),
-    )(),
+  getStats: async () => {
+    const { windows = [], tabs = [] } = await getStats()
+    return { windows: windows.length, tabs: tabs.length }
+  },
+  getUrls: async (mode = 'current') => {
+    const { current, windows } = await getWindowData()
+    return getTabUrls(getTabsByMode(current, windows, mode))
+  },
+  getCounts: async () => {
+    const { current, windows } = await getWindowData()
+    const modes = {
+      current: current?.tabs,
+      all: windows.flatMap(w => w?.tabs ?? []),
+      incognito: filterTabs(windows, w => w?.incognito),
+      normal: filterTabs(windows, w => !w?.incognito)
+    }
+    return Object.fromEntries(
+      Object.entries(modes).map(([k, tabs]) => [k, getTabUrls(tabs).length])
+    )
+  }
 }
 
-export const meta = {
-  encode: data =>
-    pipe(
-      () => url.getStats(),
-      async ({ windows, tabs }) =>
-        [
-          'INC@1',
-          new Date().toISOString().slice(2, 12).replace(/[-T]/g, ''),
-          `W${windows}.T${tabs}`,
-          b64.encode(data),
-        ].join('::'),
-    )(),
+// Metadata management
+const meta = {
+  encode: async data => {
+    const [windows, tabs] = await Promise.all([getWindows(), url.getUrls('all')])
+    const date = new Date().toISOString().slice(2, 12).replace(/[-T]/g, '')
+    return ['LT@1', date, `W${windows.length}.T${tabs.length}`, b64.encode(data)].join('::')
+  },
   decode: text => {
     const [meta, data] = text.split('::')
-    if (!(meta?.startsWith('INC@') && data)) return null
-    const [prefix, timestamp, windows, tabs] = meta.split('.')
-    return (
-      prefix &&
-      timestamp &&
-      windows?.startsWith('W') &&
-      tabs?.startsWith('T') && {
-        version: prefix.slice(4),
-        date: timestamp,
-        windows: +windows.slice(1),
-        tabs: +tabs.slice(1),
-        data: b64.decode(data),
-      }
-    )
-  },
+    if (!meta?.startsWith('LT@') || !data) return null
+
+    const [prefix, date, windows, tabs] = meta.split('.')
+    if (!prefix || !date || !windows?.startsWith('W') || !tabs?.startsWith('T')) return null
+
+    return {
+      version: prefix.slice(4),
+      date,
+      windows: +windows.slice(1),
+      tabs: +tabs.slice(1),
+      data: b64.decode(data)
+    }
+  }
 }
 
-export const processData = async (promise, transform) => {
+const processData = async (promise, transform, mode) => {
   const urls = await promise?.then(transform)
   if (!has(urls)) return
+
   const groups = groupByDomain(urls)
-  return (
-    confirm(`Open ${urls.length} tabs?`) &&
-    Promise.all(Object.values(groups).map(url => chrome.windows.create({ incognito: true, url })))
+  const incognito = mode === 'incognito'
+  const msg = `Open ${urls.length} tabs in ${incognito ? 'incognito' : 'normal'} windows?`
+
+  return confirm(msg) && Promise.all(
+    Object.values(groups).map(urls => chrome.windows.create({ incognito, url: urls }))
   )
 }
+
+export { cfg, has, trim, b64, url, meta, processData }

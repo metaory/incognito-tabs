@@ -2,14 +2,13 @@
 #  █░█ █ █▄▄ █▄█
 #  ▁▁▁▁▁▁▁▁v0.7▁
 #
-# ░░ USAGE ░░░░░░░░░░░░░░░░░░░░░░
-# ░░ ▔▔▔▔▔                     ░░
-# ░░   run this template       ░░
-# ░░                           ░░
-# ░░  xico -t .github/icon.xc  ░░
-# ░░                           ░░
-# ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
-
+# ░░ USAGE ░░░░░░░░░░░░░░░░
+#    ▔▔▔▔▔
+#  run this template
+#
+# xico -t .github/icon.xc
+# ▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+#
 
 set d 0
 set o 1
@@ -27,6 +26,7 @@ set r_y 2
 set border 6
 
 set bg #CCEE44
+set bg #FF3377
 set fg #220033
 set stroke #220033
 
